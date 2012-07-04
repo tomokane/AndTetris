@@ -20,10 +20,13 @@ import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.Entity;
+import org.andengine.entity.modifier.MoveModifier;
 import org.andengine.entity.primitive.Line;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.sprite.ButtonSprite;
+import org.andengine.entity.sprite.ButtonSprite.OnClickListener;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.opengl.texture.ITexture;
@@ -35,6 +38,9 @@ import org.andengine.util.adt.io.in.IInputStreamOpener;
 import org.andengine.util.color.Color;
 import org.andengine.util.debug.Debug;
 
+import android.util.Log;
+import android.widget.Toast;
+
 /**
  * (c) 2010 Nicolas Gramlich
  * (c) 2011 Zynga
@@ -42,7 +48,7 @@ import org.andengine.util.debug.Debug;
  * @author Nicolas Gramlich
  * @since 11:54:51 - 03.04.2010
  */
-public class MainActivity extends SimpleBaseGameActivity {
+public class MainActivity extends SimpleBaseGameActivity implements OnClickListener{
 	// ===========================================================
 	// Constants
 	// ===========================================================
@@ -57,12 +63,7 @@ public class MainActivity extends SimpleBaseGameActivity {
 	private ITexture mTexture;
 	private ITextureRegion mFaceTextureRegion;
 	private Scene scene;
-	private float centerX;
-	private float centerY;
-
-    private Thread gameLoop;
-    
-    private Board board;
+	private Board board;
     
     private Block block;
     private Block nextBlock;
@@ -72,6 +73,9 @@ public class MainActivity extends SimpleBaseGameActivity {
 	private ArrayList<Entity> arrayList;
 	private Line[] lineArray;
 	private Rectangle[] rectArray;
+	private float buttonSize = 32f;
+	private Rectangle leftButton;
+	private Rectangle rightButton;
     
 
 	// ===========================================================
@@ -99,7 +103,7 @@ public class MainActivity extends SimpleBaseGameActivity {
 			this.mTexture = new BitmapTexture(this.getTextureManager(), new IInputStreamOpener() {
 				@Override
 				public InputStream open() throws IOException {
-					return getAssets().open("gfx/face_box.png");
+					return getAssets().open("gfx/tinybutton.png");
 				}
 			});
 
@@ -121,20 +125,25 @@ public class MainActivity extends SimpleBaseGameActivity {
 		
 		this.mEngine.registerUpdateHandler(new FPSLogger());
 		
-		centerX = (CAMERA_WIDTH - this.mFaceTextureRegion.getWidth()) / 2;
-		centerY = (CAMERA_HEIGHT - this.mFaceTextureRegion.getHeight()) / 2;
-		
-//		Sprite blockSprite = new Sprite(centerX, centerY, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
-//		Sprite blockSprite2 = new Sprite(centerX, centerY, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
-		
-		scene = new Scene();
-		scene.setBackground(new Background(Color.BLACK));
-		scene.setPosition(0, 32);
+		createScene();
 		
 		board = new Board(scene, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
 		block = createBlock(board);
 		block.draw(scene, mFaceTextureRegion, this.getVertexBufferObjectManager());
 		entity = block.getEntity();
+		
+		final Sprite leftButton = new ButtonSprite(CAMERA_WIDTH-100, -buttonSize, this.mFaceTextureRegion, this.getVertexBufferObjectManager(), this);
+		leftButton.setRotation(270f);
+		
+		final Sprite rightButton = new ButtonSprite(CAMERA_WIDTH-100, CAMERA_HEIGHT - 80, this.mFaceTextureRegion, this.getVertexBufferObjectManager(), this);
+		rightButton.setRotation(270f);
+		
+		scene.registerTouchArea(leftButton);
+		scene.registerTouchArea(rightButton);
+		
+		scene.attachChild(leftButton);
+		scene.attachChild(rightButton);
+		scene.setTouchAreaBindingOnActionDownEnabled(true);
 		
 		lineArray = board.getLineArray();
 		rectArray = block.getRectArray();
@@ -191,11 +200,16 @@ public class MainActivity extends SimpleBaseGameActivity {
 		return scene;
 	}
 
-	
-	private void repaint() {
-		block.draw(scene, this.mFaceTextureRegion, this.getVertexBufferObjectManager());
+	/**
+	 * 
+	 */
+	private void createScene() {
+		scene = new Scene();
+		scene.setBackground(new Background(Color.BLACK));
+		scene.setPosition(0, 32);
 	}
 
+	
 	/**
 	 * create block
 	 * @param reference board
@@ -222,5 +236,40 @@ public class MainActivity extends SimpleBaseGameActivity {
 		
 		return null;
 	}
+	
+	private void rotateBlock() {
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				final Entity block = MainActivity.this.entity;
+				block.clearEntityModifiers();
+				
+				final float x = block.getX();
+				final float y = block.getY();
+				block.setPosition(y, x);
+				block.registerEntityModifier(new MoveModifier(3, 0, CAMERA_WIDTH - Board.TILE_SIZE, x, x));
+				
+			}
+		});
+	}
+
+	final private String TAG = "MainActivity.onClick";
+	@Override
+	public void onClick(final ButtonSprite pButtonSprite, float pTouchAreaLocalX,
+			float pTouchAreaLocalY) {
+		runOnUiThread(new Runnable() {
+			
+
+			@Override
+			public void run() {
+				Log.v(TAG,String.valueOf(pButtonSprite.getY()));
+				Toast.makeText(MainActivity.this, "click", Toast.LENGTH_LONG).show();
+			}
+		});
+		
+	}
+	
 
 }
