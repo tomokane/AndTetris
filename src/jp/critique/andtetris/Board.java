@@ -33,14 +33,23 @@ public class Board {
 	private ITextureRegion mFaceTextureRegion;
 	private VertexBufferObjectManager vertexBufferObjectManager;
 	private Scene scene;
-	private Line[] lineArray;
+	private Line[] horizontalLineArray;
+	private Line[] verticalLineArray;
 
-	public Line[] getLineArray() {
-		return lineArray;
+	public Line[] getHorizontalLineArray() {
+		return horizontalLineArray;
 	}
 
-	public void setLineArray(Line[] lineArray) {
-		this.lineArray = lineArray;
+	public void setHorizontalLineArray(Line[] lineArray) {
+		this.horizontalLineArray = lineArray;
+	}
+
+	public Line[] getVerticalLineArray() {
+		return verticalLineArray;
+	}
+
+	public void setVerticalLineArray(Line[] verticalLineArray) {
+		this.verticalLineArray = verticalLineArray;
 	}
 
 	/**
@@ -61,20 +70,20 @@ public class Board {
 	 * draw wall.
 	 */
 	private void init() {
+		verticalLineArray = new Line[MAX_X + 1];
+		horizontalLineArray = new Line[MAX_Y + 1];
 		
-		lineArray = new Line[MAX_Y + 1];
-		
-		for (int i = 0; i < MAX_X + 1; i++) {
-			Line line = new Line(0, i * 16, MainActivity.CAMERA_WIDTH, i * 16, this.vertexBufferObjectManager);
-			line.setColor(1f,0,0);
-			line.setLineWidth(3f);
-			this.scene.attachChild(line);
+		for (int i = 0; i < verticalLineArray.length + 1; i++) {
+			verticalLineArray[i] = new Line(0, i * 16, MainActivity.CAMERA_WIDTH, i * 16, this.vertexBufferObjectManager);
+			verticalLineArray[i].setColor(1f,0,0);
+			verticalLineArray[i].setLineWidth(3f);
+			this.scene.attachChild(verticalLineArray[i]);
 		}
-		for (int i = 0; i < lineArray.length; i++) {
-			lineArray[i] = new Line(i * 16, 0, i * 16, 192 , this.vertexBufferObjectManager);
-			lineArray[i].setColor(1f,0,0);
-			lineArray[i].setLineWidth(3f);
-			this.scene.attachChild(lineArray[i]);
+		for (int i = 0; i < horizontalLineArray.length; i++) {
+			horizontalLineArray[i] = new Line(i * 16, 0, i * 16, 192 , this.vertexBufferObjectManager);
+			horizontalLineArray[i].setColor(1f,0,0);
+			horizontalLineArray[i].setLineWidth(3f);
+			this.scene.attachChild(horizontalLineArray[i]);
 		}
 	}
 	
@@ -84,18 +93,18 @@ public class Board {
 	 * @param mFaceTextureRegion sprite
 	 * @param vertexBufferObjectManager manager
 	 */
-	public void draw(Scene s, ITextureRegion mFaceTextureRegion, VertexBufferObjectManager vertexBufferObjectManager) {
-		for (int y = 0; y < MAX_Y; y++) {
-			for (int x = 0; x < MAX_X; x++) {
-				if(board[y][x] == 1) {
-//					Sprite blockSprite = new Sprite(x * TILE_SIZE, y * TILE_SIZE, mFaceTextureRegion, vertexBufferObjectManager);
-					Rectangle blockRect = new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, vertexBufferObjectManager);
-					blockRect.setColor(0.9f, 0.1f, 0.1f);
-					s.attachChild(blockRect);
-				}
-			}
-		}
-	}
+//	public void draw(Scene s, ITextureRegion mFaceTextureRegion, VertexBufferObjectManager vertexBufferObjectManager) {
+//		for (int y = 0; y < MAX_Y; y++) {
+//			for (int x = 0; x < MAX_X; x++) {
+//				if(board[y][x] == 1) {
+////					Sprite blockSprite = new Sprite(x * TILE_SIZE, y * TILE_SIZE, mFaceTextureRegion, vertexBufferObjectManager);
+//					Rectangle blockRect = new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, vertexBufferObjectManager);
+//					blockRect.setColor(0.9f, 0.1f, 0.1f);
+//					s.attachChild(blockRect);
+//				}
+//			}
+//		}
+//	}
 	
 	/**
 	 * check block movable

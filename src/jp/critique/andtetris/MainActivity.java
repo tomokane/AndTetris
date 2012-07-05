@@ -21,6 +21,7 @@ import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.Entity;
 import org.andengine.entity.modifier.MoveModifier;
+import org.andengine.entity.modifier.RotationModifier;
 import org.andengine.entity.primitive.Line;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
@@ -66,16 +67,16 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 	private Board board;
     
     private Block block;
-    private Block nextBlock;
-    
     private Random rand;
 	private Entity entity;
 	private ArrayList<Entity> arrayList;
-	private Line[] lineArray;
+	private ArrayList<Entity> fixedBlocks;
+	private Line[] horizontalLineArray;
 	private Rectangle[] rectArray;
 	private float buttonSize = 32f;
-	private Rectangle leftButton;
-	private Rectangle rightButton;
+	private Line[] verticalLineArray;
+	
+	
     
 
 	// ===========================================================
@@ -112,8 +113,6 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 			
 			rand = new Random();
 			
-//			block = createBlock(board);
-			
 		} catch (IOException e) {
 			Debug.e(e);
 		}
@@ -132,20 +131,10 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 		block.draw(scene, mFaceTextureRegion, this.getVertexBufferObjectManager());
 		entity = block.getEntity();
 		
-		final Sprite leftButton = new ButtonSprite(CAMERA_WIDTH-100, -buttonSize, this.mFaceTextureRegion, this.getVertexBufferObjectManager(), this);
-		leftButton.setRotation(270f);
+		createButtons();
 		
-		final Sprite rightButton = new ButtonSprite(CAMERA_WIDTH-100, CAMERA_HEIGHT - 80, this.mFaceTextureRegion, this.getVertexBufferObjectManager(), this);
-		rightButton.setRotation(270f);
-		
-		scene.registerTouchArea(leftButton);
-		scene.registerTouchArea(rightButton);
-		
-		scene.attachChild(leftButton);
-		scene.attachChild(rightButton);
-		scene.setTouchAreaBindingOnActionDownEnabled(true);
-		
-		lineArray = board.getLineArray();
+		horizontalLineArray = board.getHorizontalLineArray();
+		verticalLineArray = board.getVerticalLineArray();
 		rectArray = block.getRectArray();
 		
 		scene.registerUpdateHandler(new IUpdateHandler() {
@@ -153,29 +142,38 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 			private int posX = 0;
 
 			@Override
-			public void reset() {
-				// TODO Auto-generated method stub
-				
-			}
+			public void reset() {}
 			
 			@Override
 			public void onUpdate(float pSecondsElapsed) {
 				posX++;
 				entity.setX(posX);
 				
+				
+				// check collision current block
 				for (int j = 0; j < rectArray.length; j++) {
-					for (int i = 0; i < lineArray.length; i++) {
-						if (rectArray[j].collidesWith(lineArray[i])) {
-							lineArray[i].setColor(Color.BLUE);
+					for (int i = 0; i < horizontalLineArray.length; i++) {
+						if (rectArray[j].collidesWith(horizontalLineArray[i])) {
+							horizontalLineArray[i].setColor(Color.BLUE);
 							break;
 						} else {
-							lineArray[i].setColor(Color.RED);
+							horizontalLineArray[i].setColor(Color.RED);
 						}
+					}
+					
+					for (int j2 = 0; j2 < verticalLineArray.length; j2++) {
+						if (rectArray[j].collidesWith(verticalLineArray[j2])) {
+							verticalLineArray[j2].setColor(Color.BLUE);
+							break;
+						} else {
+							verticalLineArray[j2].setColor(Color.RED);
+						}
+						
 					}
 				}
 				
 				for (int j = 0; j < rectArray.length; j++) {
-						if (rectArray[j].collidesWith(lineArray[lineArray.length - 1])) {
+						if (rectArray[j].collidesWith(horizontalLineArray[horizontalLineArray.length - 1])) {
 							arrayList.add(entity);
 							block = createBlock(board);
 							block.draw(scene, mFaceTextureRegion, MainActivity.this.getVertexBufferObjectManager());
@@ -198,6 +196,29 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 		});
 
 		return scene;
+	}
+
+	/**
+	 * 
+	 */
+	private void createButtons() {
+		final Sprite leftButton = new ButtonSprite(CAMERA_WIDTH-100, -buttonSize, this.mFaceTextureRegion, this.getVertexBufferObjectManager(), this);
+		leftButton.setRotation(270f);
+		
+		final Sprite rightButton = new ButtonSprite(CAMERA_WIDTH-100, CAMERA_HEIGHT - 60, this.mFaceTextureRegion, this.getVertexBufferObjectManager(), this);
+		rightButton.setRotation(270f);
+		
+		final Sprite rotateButton = new ButtonSprite(CAMERA_WIDTH-20, CAMERA_HEIGHT / 2 - 80, this.mFaceTextureRegion, this.getVertexBufferObjectManager(), this);
+		rotateButton.setRotation(270f);
+		
+		scene.registerTouchArea(leftButton);
+		scene.registerTouchArea(rightButton);
+		scene.registerTouchArea(rotateButton);
+		
+		scene.attachChild(leftButton);
+		scene.attachChild(rightButton);
+		scene.attachChild(rotateButton);
+		scene.setTouchAreaBindingOnActionDownEnabled(true);
 	}
 
 	/**
@@ -237,20 +258,23 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 		return null;
 	}
 	
-	private void rotateBlock() {
+	private void moveBlock(final String direction) {
 		runOnUiThread(new Runnable() {
 			
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				final Entity block = MainActivity.this.entity;
 				block.clearEntityModifiers();
 				
 				final float x = block.getX();
 				final float y = block.getY();
-				block.setPosition(y, x);
-				block.registerEntityModifier(new MoveModifier(3, 0, CAMERA_WIDTH - Board.TILE_SIZE, x, x));
-				
+				final float degree = block.getRotation();
+				if(direction == "right")
+					block.registerEntityModifier(new MoveModifier(0.3f, x, x, y, y - Board.TILE_SIZE));
+				else if(direction == "left")
+					block.registerEntityModifier(new MoveModifier(0.3f, x, x, y, y + Board.TILE_SIZE));
+				else if(direction == "rotate")
+					block.registerEntityModifier(new RotationModifier(0.3f, degree, degree + 90));
 			}
 		});
 	}
@@ -261,11 +285,16 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 			float pTouchAreaLocalY) {
 		runOnUiThread(new Runnable() {
 			
-
 			@Override
 			public void run() {
 				Log.v(TAG,String.valueOf(pButtonSprite.getY()));
-				Toast.makeText(MainActivity.this, "click", Toast.LENGTH_LONG).show();
+				if(pButtonSprite.getY()>CAMERA_HEIGHT - 61) {
+					MainActivity.this.moveBlock("left");
+				}else if(pButtonSprite.getY()<0) {
+					MainActivity.this.moveBlock("right");
+				}else {
+					MainActivity.this.moveBlock("rotate");
+				}
 			}
 		});
 		
