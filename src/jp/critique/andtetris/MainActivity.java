@@ -188,12 +188,12 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 					boolean isCollide = false;
 					for (int i = 0; i < block.getChildCount(); i++) {
 						// check collide fixed block
-//						for (int j = 0; j < Block.fixedBlocks.size(); j++) {
-//							if(Block.fixedBlocks.get(j).collidesWith((IShape) block.getChildByIndex(i))) {
-//								isCollide = true;
-//								break;
-//							}
-//						}
+						for (int j = 0; j < Block.fixedBlocks.size(); j++) {
+							if(Block.fixedBlocks.get(j).collidesWith((IShape) block.getChildByIndex(i))) {
+								isCollide = true;
+								break;
+							}
+						}
 //						
 						// check collide bottom line
 						if(Board.bottomLine.collidesWith((IShape) block.getChildByIndex(i))) {
@@ -206,14 +206,14 @@ public class MainActivity extends SimpleBaseGameActivity implements OnClickListe
 					
 					// collision with block
 					if(isCollide) {
-						MainActivity.this.block.physicsHandler.setVelocity(0f);
-//						for (int i = 0; i < block.getChildCount(); i++) {
-//							Block.fixedBlocks.add((Rectangle) block.getChildByIndex(i));
-//						}
+//						MainActivity.this.block.physicsHandler.setVelocity(0f);
+						for (int i = 0; i < block.getChildCount(); i++) {
+							Block.fixedBlocks.add((Rectangle) block.getChildByIndex(i));
+						}
 						MainActivity.this.block = new BarBlock(tetrisContainer, getVertexBufferObjectManager());
 					} else {
-//						float posY = block.getY();
-//						block.setY(posY + 1);
+						float posY = block.getY();
+						block.setY(posY + 10);
 					}
 					
 				}

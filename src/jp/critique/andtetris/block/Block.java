@@ -96,10 +96,10 @@ public abstract class Block {
 		rectangleGroup = new Rectangle[4];
 		this.vertexBufferObjectManager = vertexBufferObjectManager;
 		entity = new Entity(165f,START_POINT);
-		physicsHandler = new PhysicsHandler(entity);
-		entity.registerUpdateHandler(physicsHandler);
-		
-		physicsHandler.setVelocityY(30);
+//		physicsHandler = new PhysicsHandler(entity);
+//		entity.registerUpdateHandler(physicsHandler);
+//		
+//		physicsHandler.setVelocityY(30);
 		
 		s.attachChild(entity);
 	}
