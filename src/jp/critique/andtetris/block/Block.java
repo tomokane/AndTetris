@@ -3,11 +3,17 @@
  */
 package jp.critique.andtetris.block;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import jp.critique.andtetris.Board;
+import jp.critique.andtetris.MainActivity;
 
+import org.andengine.engine.handler.physics.PhysicsHandler;
 import org.andengine.entity.Entity;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.MoveYModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
@@ -42,7 +48,14 @@ public abstract class Block {
 	public static final int REVERSE_L_SHAPE = 6;
 	public static final int WALL = 7;
 	
-	protected int[][] block;
+	public static final int ZERO_DEGREE = 0;
+	public static final int NINTY_DEGREE = 1;
+	public static final int ONEEIGHTY_DEGREE = 2;
+	public static final int TWOSEVENTY_DEGREE = 3;
+	
+	public static ArrayList<Rectangle> fixedBlocks = new ArrayList<Rectangle>();
+	
+	protected int[][] block = new int[4][4];
 	protected int imageNo;
 	
 	protected Point pos;
@@ -52,6 +65,12 @@ public abstract class Block {
 	private Entity blockGroup;
 	private Entity entity;
 	private Rectangle[] rectArray;
+	private Rectangle[] rectangleGroup;
+	public MoveYModifier moveYModifier;
+	public PhysicsHandler physicsHandler;
+	private VertexBufferObjectManager vertexBufferObjectManager;
+	public int[][] blockArray;
+	public static final float START_POINT = 1.5f * 30;
 
 	public Rectangle[] getRectArray() {
 		return rectArray;
@@ -73,83 +92,31 @@ public abstract class Block {
 	 * constructer
 	 * @param board scene
 	 */
-	public Block(Board board) {
-		block = new int[MAX_Y][MAX_X];
-		for (int y = 0; y < MAX_Y; y++) {
-			for (int x = 0; x < MAX_X; x++) {
-				block[y][x] = 0;
-			}
-		}
+	public Block(Scene s, VertexBufferObjectManager vertexBufferObjectManager) {
+		rectangleGroup = new Rectangle[4];
+		this.vertexBufferObjectManager = vertexBufferObjectManager;
+		entity = new Entity(165f,START_POINT);
+		physicsHandler = new PhysicsHandler(entity);
+		entity.registerUpdateHandler(physicsHandler);
 		
-		imageNo = 6;
-		pos = new Point(4, 4);
+		physicsHandler.setVelocityY(30);
 		
-		this.board = board;
-		
-	}
-	
-	public void draw(Scene s, ITextureRegion mFaceTextureRegion, VertexBufferObjectManager vertexBufferObjectManager) {
-		
-		int gradientCounter = 0;
-		
-		rectArray = new Rectangle[4];
-		
-		entity = new Entity(pos.x * TILE_SIZE,pos.y * TILE_SIZE);
-		
-		for (int y = 0; y < MAX_Y; y++) {
-			for (int x = 0; x < MAX_X; x++) {
-				if (block[y][x] == 1) {
-					rectArray[gradientCounter] = new Rectangle((x - 2) * TILE_SIZE,(y - 2) * TILE_SIZE
-							,TILE_SIZE,TILE_SIZE, vertexBufferObjectManager);
-					rectArray[gradientCounter].setColor(0,(float) (0.5 + 0.1 * gradientCounter),0);
-					entity.attachChild(rectArray[gradientCounter]);
-					gradientCounter++;
-				}
-			}
-		}
 		s.attachChild(entity);
 	}
 	
-	/**
-	 * move block to direction
-	 * @param dir direction
-	 * @return return true if fixed block
-	 */
-	public boolean move(int dir) {
-		switch (dir) {
-		case LEFT:
-			Point newPos = new Point(pos.x - 1, pos.y);
-			if(board.isMovable(newPos, block)) {
-				pos = newPos;
-			}
-			break;
-		case RIGHT:
-			newPos = new Point(pos.x + 1, pos.y);
-			if(board.isMovable(newPos, block)) {
-				pos = newPos;
-			} else {
-				board.fixBlock(pos, block, imageNo);
-				return true;
-			}
-			break;
-		}
-		return false;
-	}
-	
-	/**
-	 * rotate block
-	 */
-	public void turn() {
-		int[][] turnedBlock = new int[MAX_Y][MAX_X];
-		
+	protected void createBlocks() {
+		int i = 0;
 		for (int y = 0; y < MAX_Y; y++) {
 			for (int x = 0; x < MAX_X; x++) {
-				turnedBlock[x][MAX_Y - 1 - y] = block[y][x];
+				if (block[y][x] == 1 && i < rectangleGroup.length) {
+					rectangleGroup[i] = new Rectangle(-15,(i - 1.5f ) * 30,30,30, this.vertexBufferObjectManager);
+					rectangleGroup[i].setColor(0.2f + (0.1f * i),0,0);
+					rectangleGroup[i].setZIndex(1);
+					entity.attachChild(rectangleGroup[i]);
+					i++;
+				}
 			}
 		}
-		
-		if (board.isMovable(pos, turnedBlock)) {
-			block = turnedBlock;
-		}
 	}
+	
 }

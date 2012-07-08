@@ -7,10 +7,14 @@ import jp.critique.andtetris.block.Block;
 
 import org.andengine.entity.primitive.Line;
 import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.primitive.vbo.LowMemoryLineVertexBufferObject;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.opengl.texture.region.ITextureRegion;
+import org.andengine.opengl.vbo.DrawType;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
+import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributes;
+import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder;
 
 import android.graphics.Color;
 import android.graphics.Point;
@@ -21,90 +25,56 @@ import android.graphics.Point;
  */
 public class Board {
 	
-	public static final int MAX_X = 12;
-	public static final int MAX_Y = 26;
+	public static final int MAX_X = 10;
+	public static final int MAX_Y = 25;
 	
-	public static final int TILE_SIZE = 16;
+	public static final int TILE_SIZE = 30;
 	
 	
 	private int[][] board;
 	private int[][] boardImage;
 	
-	private ITextureRegion mFaceTextureRegion;
 	private VertexBufferObjectManager vertexBufferObjectManager;
 	private Scene scene;
 	private Line[] horizontalLineArray;
 	private Line[] verticalLineArray;
-
+	public static Line leftLine;
+	public static Line rightLine;
+	public static Line bottomLine;
+	
 	public Line[] getHorizontalLineArray() {
 		return horizontalLineArray;
-	}
-
-	public void setHorizontalLineArray(Line[] lineArray) {
-		this.horizontalLineArray = lineArray;
 	}
 
 	public Line[] getVerticalLineArray() {
 		return verticalLineArray;
 	}
 
-	public void setVerticalLineArray(Line[] verticalLineArray) {
-		this.verticalLineArray = verticalLineArray;
-	}
-
 	/**
 	 * Constructor
 	 */
-	public Board(Scene scene, ITextureRegion mFaceTextureRegion, VertexBufferObjectManager vertexBufferObjectManager) {
-		board = new int[MAX_Y][MAX_X];
-		boardImage = new int[MAX_Y][MAX_X];
+	public Board(Scene scene, VertexBufferObjectManager vertexBufferObjectManager) {
+		board = new int[MAX_X][MAX_Y];
+		boardImage = new int[MAX_X][MAX_Y];
 		
-		this.mFaceTextureRegion = mFaceTextureRegion;
 		this.vertexBufferObjectManager = vertexBufferObjectManager;
 		this.scene = scene;
 		
-		init();
+		createBottomLine();
 	}
 	
 	/**
 	 * draw wall.
 	 */
-	private void init() {
-		verticalLineArray = new Line[MAX_X + 1];
-		horizontalLineArray = new Line[MAX_Y + 1];
+	private void createBottomLine() {
 		
-		for (int i = 0; i < verticalLineArray.length + 1; i++) {
-			verticalLineArray[i] = new Line(0, i * 16, MainActivity.CAMERA_WIDTH, i * 16, this.vertexBufferObjectManager);
-			verticalLineArray[i].setColor(1f,0,0);
-			verticalLineArray[i].setLineWidth(3f);
-			this.scene.attachChild(verticalLineArray[i]);
-		}
-		for (int i = 0; i < horizontalLineArray.length; i++) {
-			horizontalLineArray[i] = new Line(i * 16, 0, i * 16, 192 , this.vertexBufferObjectManager);
-			horizontalLineArray[i].setColor(1f,0,0);
-			horizontalLineArray[i].setLineWidth(3f);
-			this.scene.attachChild(horizontalLineArray[i]);
-		}
+		bottomLine = new Line(0, MainActivity.CAMERA_HEIGHT - 1, MainActivity.CONTAINER_WIDTH, MainActivity.CAMERA_HEIGHT - 1, this.vertexBufferObjectManager);
+		bottomLine.setColor(1, 0, 0);
+		bottomLine.setAlpha(0);
+		bottomLine.setLineWidth(3f);
+		this.scene.attachChild(bottomLine);
 	}
 	
-	/**
-	 * insert sprite
-	 * @param s Scene
-	 * @param mFaceTextureRegion sprite
-	 * @param vertexBufferObjectManager manager
-	 */
-//	public void draw(Scene s, ITextureRegion mFaceTextureRegion, VertexBufferObjectManager vertexBufferObjectManager) {
-//		for (int y = 0; y < MAX_Y; y++) {
-//			for (int x = 0; x < MAX_X; x++) {
-//				if(board[y][x] == 1) {
-////					Sprite blockSprite = new Sprite(x * TILE_SIZE, y * TILE_SIZE, mFaceTextureRegion, vertexBufferObjectManager);
-//					Rectangle blockRect = new Rectangle(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, vertexBufferObjectManager);
-//					blockRect.setColor(0.9f, 0.1f, 0.1f);
-//					s.attachChild(blockRect);
-//				}
-//			}
-//		}
-//	}
 	
 	/**
 	 * check block movable

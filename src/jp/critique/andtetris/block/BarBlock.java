@@ -21,8 +21,8 @@ public class BarBlock extends Block {
 	 * @param mFaceTextureRegion 
 	 * @param scene 
 	 */
-	public BarBlock(Board board) {
-		super(board);
+	public BarBlock(Scene s, VertexBufferObjectManager vertexBufferObjectManager) {
+		super(s, vertexBufferObjectManager);
         // □■□□
         // □■□□
         // □■□□
@@ -32,7 +32,9 @@ public class BarBlock extends Block {
         block[2][1] = 1;
         block[3][1] = 1;
         
-        imageNo = Block.BAR;
+        this.createBlocks();
+//        
+//        imageNo = Block.BAR;
 	}
 
 }
