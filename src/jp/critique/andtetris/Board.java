@@ -68,7 +68,7 @@ public class Board {
 	 */
 	private void createBottomLine() {
 		
-		bottomLine = new Line(0, MainActivity.CAMERA_HEIGHT - 1, MainActivity.CONTAINER_WIDTH, MainActivity.CAMERA_HEIGHT - 1, this.vertexBufferObjectManager);
+		bottomLine = new Line(0, AndrisActivity.CAMERA_HEIGHT - 1, AndrisActivity.CONTAINER_WIDTH, AndrisActivity.CAMERA_HEIGHT - 1, this.vertexBufferObjectManager);
 		bottomLine.setColor(1, 0, 0);
 		bottomLine.setAlpha(0);
 		bottomLine.setLineWidth(3f);

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import jp.critique.andtetris.Board;
-import jp.critique.andtetris.MainActivity;
+import jp.critique.andtetris.AndrisActivity;
 
 import org.andengine.engine.handler.physics.PhysicsHandler;
 import org.andengine.entity.Entity;
